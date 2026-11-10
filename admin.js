@@ -1,46 +1,26 @@
 
 (() => {
-  const cfg = window.OLIVER_FOTO_CONFIG || {albums:[]};
-  const STORAGE_KEY = "oliver-foto-admin-albums-v1";
   const $ = id => document.getElementById(id);
-
-  let albums = [];
-
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    albums = saved ? JSON.parse(saved) : (cfg.albums || []).map(a => ({...a}));
-  } catch {
-    albums = (cfg.albums || []).map(a => ({...a}));
-  }
+  let albums = (window.OLIVER_FOTO_CONFIG?.albums || []).map(a => ({...a, images:[...(a.images || [])]}));
+  let newFiles = [];
 
   function message(text, error = false) {
-    const output = $("form-message");
-    output.textContent = text;
-    output.style.color = error ? "#ff9999" : "#d7ff5c";
+    $("form-message").textContent = text;
+    $("form-message").style.color = error ? "#ff9999" : "#d7ff5c";
   }
 
-  function save() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(albums));
-      render();
-    } catch (error) {
-      message("Could not save: " + error.message, true);
-    }
+  function slug(text) {
+    return text.toLowerCase()
+      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "") || "album";
   }
 
-  function extractFolderId(value) {
-    const input = value.trim();
-
-    const match =
-      input.match(/drive\.google\.com\/drive\/folders\/([a-zA-Z0-9_-]+)/) ||
-      input.match(/[?&]id=([a-zA-Z0-9_-]+)/);
-
-    if (match) return match[1];
-
-    if (/^[a-zA-Z0-9_-]{15,}$/.test(input)) return input;
-
-    return null;
-  }
+  $("photos").addEventListener("change", () => {
+    newFiles = Array.from($("photos").files || []);
+    $("photo-count").textContent =
+      `${newFiles.length} photograph${newFiles.length === 1 ? "" : "s"} selected.`;
+  });
 
   function render() {
     $("album-count").textContent =
@@ -51,7 +31,7 @@
 
     if (!albums.length) {
       container.innerHTML =
-        '<div class="admin-empty">No albums added yet.<br>Your collections will appear here.</div>';
+        '<div class="admin-empty">No albums yet. Add your first collection.</div>';
       return;
     }
 
@@ -59,29 +39,29 @@
       const row = document.createElement("div");
       row.className = "admin-album";
 
-      row.innerHTML = `
-        <img class="album-thumb" alt="">
-        <div class="admin-album-info">
-          <strong></strong>
-          <span></span>
-        </div>
-        <button class="remove-btn" type="button">REMOVE</button>
-      `;
+      const info = document.createElement("div");
+      info.className = "admin-album-info";
 
-      row.querySelector("img").src =
-        `https://drive.google.com/thumbnail?id=${encodeURIComponent(album.folderId)}&sz=w300`;
+      const title = document.createElement("strong");
+      title.textContent = album.title;
 
-      row.querySelector("strong").textContent = album.title;
+      const details = document.createElement("span");
+      details.textContent =
+        `${album.category} · ${album.images.length} photos · ${album.date || "No date"}`;
 
-      row.querySelector("span").textContent =
-        `${album.category} · ${album.date || "No date"}`;
+      info.append(title, details);
 
-      row.querySelector("button").addEventListener("click", () => {
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "remove-btn";
+      remove.textContent = "REMOVE";
+      remove.addEventListener("click", () => {
         albums.splice(index, 1);
-        save();
-        message("Album removed.");
+        render();
+        message("Album removed. Export a new package to publish the change.");
       });
 
+      row.append(info, remove);
       container.appendChild(row);
     });
   }
@@ -90,59 +70,114 @@
     event.preventDefault();
 
     const title = $("title").value.trim();
-    const folderId = extractFolderId($("folder").value);
 
     if (!title) {
-      message("Enter an album title.", true);
+      message("Enter an album name.", true);
       return;
     }
 
-    if (!folderId) {
-      message("Invalid Google Drive folder link.", true);
+    if (!newFiles.length) {
+      message("Select at least one photograph.", true);
       return;
     }
 
-    albums.unshift({
-      title: title,
-      folderId: folderId,
-      category: $("category").value,
-      date: $("date").value,
-      description: $("description").value.trim()
+    const albumSlug = slug(title) + "-" + Date.now();
+    const images = newFiles.map((file, index) => {
+      const extension = file.name.split(".").pop().toLowerCase();
+      const filename = `${albumSlug}-${String(index + 1).padStart(3, "0")}.${extension}`;
+
+      return {
+        src: `uploads/${filename}`,
+        name: file.name,
+        file: file
+      };
     });
 
-    save();
+    albums.push({
+      title,
+      category: $("category").value,
+      date: $("date").value,
+      description: $("description").value.trim(),
+      images
+    });
+
     $("album-form").reset();
+    newFiles = [];
+    $("photo-count").textContent = "No photographs selected.";
 
-    message("Album added successfully! Export albums.json to publish it.");
+    render();
+    message("Album added! Export your website package to publish it.");
   });
 
-  $("export").addEventListener("click", () => {
-    const blob = new Blob(
-      [JSON.stringify(albums, null, 2)],
-      {type: "application/json"}
-    );
+  $("export").addEventListener("click", async () => {
+    if (!window.JSZip) {
+      message("ZIP library did not load. Refresh the page and try again.", true);
+      return;
+    }
 
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
+    if (!albums.length) {
+      message("Add an album before exporting.", true);
+      return;
+    }
 
-    link.href = url;
-    link.download = "albums.json";
+    const button = $("export");
+    button.disabled = true;
+    button.textContent = "BUILDING PACKAGE...";
 
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    try {
+      const zip = new JSZip();
+      const uploadFolder = zip.folder("uploads");
 
-    URL.revokeObjectURL(url);
+      const cleanAlbums = albums.map(album => ({
+        title: album.title,
+        category: album.category,
+        date: album.date,
+        description: album.description,
+        images: album.images.map(image => ({
+          src: image.src,
+          name: image.name
+        }))
+      }));
 
-    message("albums.json exported successfully!");
-  });
+      for (const album of albums) {
+        for (const image of album.images) {
+          if (image.file) {
+            uploadFolder.file(
+              image.src.replace("uploads/", ""),
+              image.file
+            );
+          }
+        }
+      }
 
-  $("clear").addEventListener("click", () => {
-    if (!confirm("Clear your local album list?")) return;
+      const config = `window.OLIVER_FOTO_CONFIG = ${JSON.stringify({
+        albums: cleanAlbums
+      }, null, 2)};`;
 
-    albums = [];
-    save();
-    message("Album list cleared.");
+      zip.file("config.js", config);
+
+      const blob = await zip.generateAsync({
+        type: "blob",
+        compression: "DEFLATE"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "oliver-foto-website.zip";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      message("Website package exported! Extract it and upload config.js and uploads/ to GitHub.");
+    } catch (error) {
+      message("Export failed: " + error.message, true);
+    } finally {
+      button.disabled = false;
+      button.textContent = "EXPORT WEBSITE PACKAGE ↗";
+    }
   });
 
   render();
