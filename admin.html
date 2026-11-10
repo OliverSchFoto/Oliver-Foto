@@ -1,36 +1,93 @@
-<!doctype html>
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#090a0c">
-<title>Album Manager — Oliver Foto</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="admin.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Album Manager — Oliver Foto</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="admin.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
-<body><div class="grain"></div>
-<header class="site-header"><a class="wordmark" href="index.html">OLIVER<span>FOTO</span><i>®</i></a><nav><a href="index.html">View website ↗</a></nav><span class="admin-tag">ALBUM MANAGER</span></header>
+<body>
+<header class="site-header">
+<a class="wordmark" href="index.html">OLIVER<span>FOTO</span><i>®</i></a>
+<a href="index.html">VIEW WEBSITE ↗</a>
+</header>
+
 <main class="admin-main">
-  <div class="admin-heading"><div><p class="eyebrow">OLIVER FOTO / BACK OFFICE</p><h1>YOUR <em>ARCHIVE.</em></h1><p class="muted">Add a public Google Drive folder and turn it into a portfolio album.</p></div><a class="back-link" href="index.html">← BACK TO SITE</a></div>
-  <div class="notice"><strong>How publishing works</strong><p>This is a static GitHub Pages site. Your album list is saved in this browser while you work. When you're ready, export <code>albums.json</code> and replace the <code>albums</code> array in <code>config.js</code> in your GitHub repository. GitHub Pages will publish the changes automatically.</p></div>
-  <div class="admin-layout">
-    <section class="panel form-panel">
-      <div class="panel-title"><span>01 / NEW ALBUM</span><span class="lime-dot"></span></div>
-      <form id="album-form">
-        <label for="title">ALBUM TITLE</label><input id="title" required maxlength="80" placeholder="e.g. IFK Göteborg — Matchday">
-        <label for="folder">GOOGLE DRIVE FOLDER LINK</label><input id="folder" required placeholder="https://drive.google.com/drive/folders/...">
-        <small>Set the folder's General access to <b>Anyone with the link — Viewer</b>.</small>
-        <div class="two-fields"><div><label for="category">CATEGORY</label><select id="category"><option>Football</option><option>Other sport</option><option>Portraits</option><option>Events</option><option>Personal</option></select></div><div><label for="date">DATE</label><input id="date" type="date"></div></div>
-        <label for="description">DESCRIPTION <span class="optional">OPTIONAL</span></label><textarea id="description" rows="3" maxlength="180" placeholder="A few words about this collection..."></textarea>
-        <button class="primary-btn" type="submit">ADD TO ALBUM LIST <span>＋</span></button>
-      </form>
-      <div id="form-message" class="form-message" role="status"></div>
-    </section>
-    <section class="panel albums-panel">
-      <div class="panel-title"><span>02 / YOUR ALBUMS</span><span id="album-count">0 ALBUMS</span></div>
-      <div id="admin-albums" class="admin-albums"><div class="admin-empty">No albums added yet.<br>Your collections will appear here.</div></div>
-      <div class="export-row"><button id="export" class="primary-btn">EXPORT ALBUMS.JSON ↗</button><button id="clear" class="quiet-btn">CLEAR LIST</button></div>
-      <p class="tiny-note">Export your album list, then copy its contents into the albums array in config.js. Keep a backup of your config before replacing it.</p>
-    </section>
-  </div>
-  <section class="setup-panel"><p class="eyebrow">03 / GOOGLE DRIVE SETUP</p><h2>CONNECT YOUR <em>PHOTOGRAPHS.</em></h2><ol><li>Open <a href="https://console.cloud.google.com/" target="_blank" rel="noreferrer">Google Cloud Console</a> and create a project.</li><li>Enable the <b>Google Drive API</b> for that project.</li><li>Create an API key under APIs &amp; Services → Credentials.</li><li>Restrict the key to the Google Drive API and your GitHub Pages website URL.</li><li>Paste the key into <code>googleDriveApiKey</code> in <code>config.js</code>.</li><li>For each album folder, set General access to <b>Anyone with the link — Viewer</b>.</li></ol><p class="tiny-note">The API key is visible in the website's public source code. It must be restricted to the Drive API and your site domain. Do not put passwords, private keys or write-access credentials in this website.</p></section>
+<div class="admin-heading">
+<div>
+<p class="eyebrow">OLIVER FOTO / BACK OFFICE</p>
+<h1>YOUR <em>ARCHIVE.</em></h1>
+<p class="muted">Upload photographs and build your portfolio albums.</p>
+</div>
+</div>
+
+<div class="notice">
+<strong>PHOTO UPLOAD SYSTEM</strong>
+<p>Select photographs from your computer, organise them into albums and export a publishing package. Upload the extracted files to GitHub to make them public.</p>
+</div>
+
+<div class="admin-layout">
+<section class="panel">
+<div class="panel-title">01 / CREATE ALBUM</div>
+
+<form id="album-form">
+<label for="title">ALBUM NAME</label>
+<input id="title" required maxlength="80" placeholder="IFK Göteborg — Matchday">
+
+<label for="category">CATEGORY</label>
+<select id="category">
+<option>Football</option>
+<option>Other sport</option>
+<option>Portraits</option>
+<option>Events</option>
+<option>Personal</option>
+</select>
+
+<label for="date">DATE</label>
+<input id="date" type="date">
+
+<label for="description">DESCRIPTION</label>
+<textarea id="description" rows="3" placeholder="A few words about this collection..."></textarea>
+
+<label for="photos">SELECT PHOTOGRAPHS</label>
+<input id="photos" type="file" accept="image/jpeg,image/png,image/webp" multiple required>
+
+<p id="photo-count" class="tiny-note">No photographs selected.</p>
+
+<button class="primary-btn" type="submit">ADD ALBUM +</button>
+</form>
+
+<p id="form-message" class="form-message"></p>
+</section>
+
+<section class="panel">
+<div class="panel-title">
+02 / YOUR ALBUMS
+<span id="album-count">0 ALBUMS</span>
+</div>
+
+<div id="admin-albums" class="admin-albums"></div>
+
+<button id="export" class="primary-btn" type="button">
+EXPORT WEBSITE PACKAGE ↗
+</button>
+
+<p class="tiny-note">
+The ZIP contains your updated config.js and all newly uploaded photographs.
+</p>
+</section>
+</div>
 </main>
-<footer><a class="wordmark" href="index.html">OLIVER<span>FOTO</span><i>®</i></a><span>PRIVATE WORKSPACE · OLIVER FOTO</span><a href="index.html">PUBLIC WEBSITE ↗</a></footer>
-<script src="config.js"></script><script src="admin.js"></script>
-</body></html>
+
+<footer>
+<a class="wordmark" href="index.html">OLIVER<span>FOTO</span><i>®</i></a>
+<span>OLIVER FOTO</span>
+</footer>
+
+<script src="config.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
