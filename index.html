@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#090a0c">
+  <meta name="description" content="Oliver Foto — sports and football photography by Oliver.">
+  <title>Oliver Foto — Sports Photography</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="grain"></div>
+  <header class="site-header">
+    <a class="wordmark" href="#top" aria-label="Oliver Foto home">OLIVER<span>FOTO</span><i>®</i></a>
+    <nav>
+      <a href="#work">Selected work</a>
+      <a href="#about">About</a>
+      <a href="#contact">Contact</a>
+    </nav>
+    <a class="header-cta" href="#contact">Get in touch <span>↗</span></a>
+    <button class="menu-toggle" aria-label="Open menu">☰</button>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="live-dot"></span> INDEPENDENT SPORTS PHOTOGRAPHY</p>
+        <h1>THE GAME.<br><em>IN FRAME.</em></h1>
+        <div class="hero-bottom">
+          <p>Capturing the moments, emotion and atmosphere that make sport unforgettable.</p>
+          <a class="round-link" href="#work" aria-label="Explore work">↓</a>
+        </div>
+      </div>
+      <div class="hero-image-wrap">
+        <img class="hero-image" src="https://images.unsplash.com/photo-1522778119026-d647f0596c20?auto=format&fit=crop&w=1800&q=88" alt="Football stadium under floodlights">
+        <div class="image-caption"><span>01 / THE BEAUTIFUL GAME</span><span>OLIVER FOTO</span></div>
+      </div>
+      <div class="hero-index">01 — 04</div>
+    </section>
+
+    <section class="intro-strip">
+      <span>BASED IN SWEDEN</span><span>FOOTBALL · SPORT · STORIES</span><span>AVAILABLE FOR SELECTED ASSIGNMENTS</span>
+    </section>
+
+    <section class="work-section section-pad" id="work">
+      <div class="section-heading">
+        <div><p class="eyebrow">THE ARCHIVE / 001</p><h2>SELECTED <em>WORK</em></h2></div>
+        <p class="section-note">A collection of moments from the touchline.<br>Choose an album to explore the full story.</p>
+      </div>
+      <div id="album-grid" class="album-grid">
+        <div class="empty-state">
+          <span class="empty-mark">OF.</span>
+          <h3>Your next story starts here.</h3>
+          <p>Add your first Google Drive album through the admin dashboard.</p>
+          <a href="admin.html" class="text-link">OPEN ALBUM MANAGER ↗</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="statement">
+      <p class="eyebrow">MORE THAN THE SCORE</p>
+      <h2>THE MOMENTS<br>BETWEEN <em>THE MOMENTS.</em></h2>
+      <p>From the first whistle to the final reaction — sport is a story worth telling.</p>
+    </section>
+
+    <section class="about-section section-pad" id="about">
+      <div class="about-label"><p class="eyebrow">A LITTLE ABOUT ME</p><span>02 / 04</span></div>
+      <div class="about-copy">
+        <h2>HELLO, I'M<br><em>OLIVER.</em></h2>
+        <p>I'm a photographer based in Sweden with a focus on football and sports. I aim to capture the intensity, details and human moments that happen around every match.</p>
+        <p class="about-small">INDEPENDENT PHOTOGRAPHER · SWEDEN</p>
+      </div>
+    </section>
+
+    <section class="contact-section" id="contact">
+      <p class="eyebrow">HAVE A PROJECT IN MIND?</p>
+      <h2>LET'S MAKE<br><em>IT COUNT.</em></h2>
+      <div class="contact-bottom">
+        <p>For photography, collaboration or enquiries.</p>
+        <a href="mailto:hello@oliverfoto.example" class="contact-link">GET IN TOUCH ↗</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <a class="wordmark" href="#top">OLIVER<span>FOTO</span><i>®</i></a>
+    <span>© <span id="year"></span> OLIVER FOTO</span>
+    <div><a href="https://instagram.com/oliver.sch.foto" target="_blank" rel="noreferrer">INSTAGRAM ↗</a><a href="admin.html">ADMIN</a></div>
+  </footer>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <button class="lightbox-close" aria-label="Close gallery">×</button>
+    <button class="lightbox-prev" aria-label="Previous image">←</button>
+    <div class="lightbox-content"><img src="" alt=""><div class="lightbox-caption"></div></div>
+    <button class="lightbox-next" aria-label="Next image">→</button>
+  </div>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
